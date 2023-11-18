@@ -53,8 +53,6 @@ export function PromptForm({
             <button
               onClick={e => {
                 e.preventDefault()
-                router.refresh()
-                router.push('/')
               }}
               className={cn(
                 buttonVariants({ size: 'sm', variant: 'outline' }),
@@ -62,10 +60,10 @@ export function PromptForm({
               )}
             >
               <IconPlus />
-              <span className="sr-only">New Chat</span>
+              <span className="sr-only">Upload Image</span>
             </button>
           </TooltipTrigger>
-          <TooltipContent>New Chat</TooltipContent>
+          <TooltipContent>Upload Image</TooltipContent>
         </Tooltip>
         <Textarea
           ref={inputRef}
