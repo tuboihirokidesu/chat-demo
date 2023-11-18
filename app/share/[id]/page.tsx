@@ -1,4 +1,3 @@
-import { type Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { formatDate } from '@/lib/utils'
@@ -11,16 +10,6 @@ export const preferredRegion = 'home'
 interface SharePageProps {
   params: {
     id: string
-  }
-}
-
-export async function generateMetadata({
-  params
-}: SharePageProps): Promise<Metadata> {
-  const chat = await getSharedChat(params.id)
-
-  return {
-    title: chat?.title.slice(0, 50) ?? 'Chat'
   }
 }
 
