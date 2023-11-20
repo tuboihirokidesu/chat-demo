@@ -9,9 +9,11 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import toast from 'react-hot-toast'
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { cn } from '@/lib/utils'
-import { useRouter } from 'next/navigation'
+import ImageUploading, { ImageListType } from 'react-images-uploading'
+import { ImageIcon } from 'lucide-react'
 
 export interface PromptProps
   extends Pick<UseChatHelpers, 'input' | 'setInput'> {
@@ -25,9 +27,28 @@ export function PromptForm({
   setInput,
   isLoading
 }: PromptProps) {
+  const [imageUpload, setImageUpload] = React.useState<ImageListType>([])
+
   const { formRef, onKeyDown } = useEnterSubmit()
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
-  const router = useRouter()
+
+  const onChangeImage = (imageList: ImageListType) => {
+    const file = imageList[0]?.file
+    const maxFileSize = 5 * 1024 * 1024
+
+    // ファイルサイズチェック
+    if (file && file.size > maxFileSize) {
+      toast.error('ファイルサイズは5MBを超えることはできません')
+      return
+    }
+
+    setImageUpload(imageList)
+
+    // 画像アップロード後にテキストエリアにフォーカスを戻す
+    if (inputRef.current) {
+      inputRef.current.focus()
+    }
+  }
 
   React.useEffect(() => {
     if (inputRef.current) {
@@ -47,24 +68,33 @@ export function PromptForm({
       }}
       ref={formRef}
     >
-      <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:border sm:px-12">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={e => {
-                e.preventDefault()
-              }}
-              className={cn(
-                buttonVariants({ size: 'sm', variant: 'outline' }),
-                'absolute left-0 top-4 h-8 w-8 rounded-full bg-background p-0 sm:left-4'
-              )}
-            >
-              <IconPlus />
-              <span className="sr-only">Upload Image</span>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>Upload Image</TooltipContent>
-        </Tooltip>
+      <div className="relative flex max-h-60 w-full grow overflow-hidden px-8 sm:rounded-md sm:border sm:px-12">
+        <ImageUploading
+          value={imageUpload}
+          onChange={onChangeImage}
+          maxNumber={1}
+          acceptType={['jpg', 'png', 'jpeg']}
+        >
+          {({ imageList, onImageUpdate }) => (
+            <div className="absolute left-0 top-4 h-8 w-8 p-0 sm:left-4">
+              <button
+                onClick={() => onImageUpdate(0)}
+                className={cn(
+                  buttonVariants({ size: 'sm', variant: 'outline' }),
+                  'relative'
+                )}
+              >
+                <IconPlus className="flex items-center justify-center" />
+                {imageList.length > 0 && (
+                  <span className="absolute right-[-4px] top-[-4px] flex h-4 w-4 items-center justify-center rounded-full bg-slate-400 text-xs text-white">
+                    <ImageIcon className="h-3 w-3" />
+                  </span>
+                )}
+                <span className="sr-only">Upload Image</span>
+              </button>
+            </div>
+          )}
+        </ImageUploading>
         <Textarea
           ref={inputRef}
           tabIndex={0}
